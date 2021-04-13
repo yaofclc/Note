@@ -55,3 +55,11 @@ LeakCanary使用了Application的ActivityLifecycleCallbacks和FragmentManager的
 - post():从subscriptionsByEventType获取CopyOnWriteArrayList<Subscription>并遍历调用postToSubscription发送    
 - ThreadMode: POSTING 发送消息的当前线程处理，MAIN:HandlerPoster处理，BACKGROUND:BackgroundPoster处理，取出所有消息处理，最多1000，ASYNC：AsyncPoster处理，只处理一个  
 - 取消注册：
+
+
+## Glide  
+- with(context):返回RequestManager，包含在RequestManagerFragment里，Glide通过RequestManagerFragment监听生命周期  
+- load():返回DrawableTypeRequest，它是DrawableRequestBuilder的子类，用于构建参数，placeHolder等，  
+- into():真正请求图片加载  
+- 缓存：内存缓存和硬盘缓存，其中内存缓存会先调用loadFromCache，使用LruCache算法，如果没有调用loadFromActiveResources，使用了弱引用，如果都没有就回开启自线程去网络请求图片，内存缓存主要是防止同样的图片重复读取到内存中来，节约JVM的内存空间，硬盘缓存也是使用LruCache算法，主要是防止同一张网络图片重复从网络中读取和下载  
+- 四种缓存策略：NONE：不缓存文件，SOURCE：只缓存原图，RESULT：只缓存最终加载的图(默认的缓存策略),ALL：同时缓存原图和结果图
