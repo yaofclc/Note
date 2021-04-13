@@ -44,4 +44,14 @@
 LeakCanary使用了Application的ActivityLifecycleCallbacks和FragmentManager的FragmentLifecycleCallbacks方法进行Activity和Fragment的生命周期检测，当Activity和Fragment被回调onDestroy以后就会被ObjectWatcher生成KeyedReference来检测，然后借助HeapDumpTrigger的轮询和触发gc的操作找到弹出提醒的时机。
 
 2.LeakCanary如何dump和分析.hprof文件的？  
-使用Android平台自带的Debug.dumpHprofData方法获取到hprof文件，使用自建的Shark库进行解析，获取到LeakTrace
+使用Android平台自带的Debug.dumpHprofData方法获取到hprof文件，使用自建的Shark库进行解析，获取到LeakTrace  
+
+## EventBus 
+- Subscribe：注解，包含ThreadMode sticky = false，priority = 0
+- 初始化：getDefault()获取单例实例对象，通过构建者模式创建  
+- 注册：SubscriberMethodFinder的findSubscriberMethods(subscriberClass)带有Subscriber的注解，返回List<SubscriberMethod>，遍历集合调用subscribe(subscriber,subscriberMethod)注册  
+- findSubscriberMethods():现在缓存中找，没有则调用findUsingReflection(subscriber)或者findUsingInfo()返回List<SubscriberMethod>放入缓存，并返回  
+- new Subscription(subscriber,subscriberMethod)，检查是否注册过，没注册过就注册(Map<Class<?>,CopyOnWriteArrayList<Subscription>> subscriptionsByEventType)，已经注册了抛异常，根据优先级排序，后面还有判断粘性事件  
+- post():从subscriptionsByEventType获取CopyOnWriteArrayList<Subscription>并遍历调用postToSubscription发送    
+- ThreadMode: POSTING 发送消息的当前线程处理，MAIN:HandlerPoster处理，BACKGROUND:BackgroundPoster处理，取出所有消息处理，最多1000，ASYNC：AsyncPoster处理，只处理一个  
+- 取消注册：
